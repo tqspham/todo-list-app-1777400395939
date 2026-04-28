@@ -39,8 +39,8 @@ export default function TodoApp() {
     }
   }, [todos, isLoading]);
 
-  const handleAddTodo = (text: string) => {
-    addTodo(text);
+  const handleAddTodo = (text: string, parentId?: string) => {
+    addTodo(text, parentId);
   };
 
   const handleToggleTodo = (id: string) => {
@@ -70,7 +70,7 @@ export default function TodoApp() {
       )}
       <div className="bg-white rounded-lg shadow-md p-6">
         <h1 className="text-3xl font-bold text-gray-800 mb-6">Todo App</h1>
-        <TodoForm onAddTodo={handleAddTodo} />
+        <TodoForm onAddTodo={handleAddTodo} todos={todos} />
         <TodoList
           todos={todos}
           onToggleTodo={handleToggleTodo}
