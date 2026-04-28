@@ -2,15 +2,19 @@
 
 import { useState } from "react";
 import { X, Plus } from "lucide-react";
+import type { Todo } from "@/lib/types";
 
 interface TodoFormProps {
-  onAddTodo: (text: string) => void;
+  onAddTodo: (text: string, parentId?: string) => void;
+  todos: Todo[];
+  parentId?: string;
 }
 
 const MAX_LENGTH = 255;
 
-export default function TodoForm({ onAddTodo }: TodoFormProps) {
+export default function TodoForm({ onAddTodo, todos, parentId }: TodoFormProps) {
   const [input, setInput] = useState<string>("");
+  const [selectedParentId, setSelectedParentId] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -27,8 +31,10 @@ export default function TodoForm({ onAddTodo }: TodoFormProps) {
       return;
     }
 
-    onAddTodo(trimmed);
+    const parentIdToUse = parentId || (selectedParentId || undefined);
+    onAddTodo(trimmed, parentIdToUse);
     setInput("");
+    setSelectedParentId("");
     setError(null);
   };
 
@@ -46,6 +52,7 @@ export default function TodoForm({ onAddTodo }: TodoFormProps) {
   };
 
   const isValid = input.trim().length > 0;
+  const availableParents = todos.filter((t) => !t.parentId && t.id !== parentId);
 
   return (
     <form onSubmit={handleSubmit} className="mb-6">
@@ -83,6 +90,27 @@ export default function TodoForm({ onAddTodo }: TodoFormProps) {
           </button>
         </div>
       </div>
+      {!parentId && availableParents.length > 0 && (
+        <div className="mb-2">
+          <label htmlFor="parent-select" className="block text-sm font-medium text-gray-700 mb-1">
+            Parent Task (optional)
+          </label>
+          <select
+            id="parent-select"
+            value={selectedParentId}
+            onChange={(e) => setSelectedParentId(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+            aria-label="Select parent task"
+          >
+            <option value="">None</option>
+            {availableParents.map((todo) => (
+              <option key={todo.id} value={todo.id}>
+                {todo.text}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
       {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
       {input && (
         <p className="text-gray-500 text-xs">
